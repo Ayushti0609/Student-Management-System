@@ -30,19 +30,23 @@ public class studentGUI {
         // Oracle DB connection function
         static Connection connectDB() {
             try {
+                System.out.println("Trying to connect...");
+
                 Class.forName("oracle.jdbc.driver.OracleDriver");
-                String url = "jdbc:oracle:thin:@localhost:1521:XE"; // Oracle URL
-                String user = "SMS"; // username
-                String pass = "ayush";  // Password 
 
-                Connection con=DriverManager.getConnection(url, user, pass);
+                String url = "jdbc:oracle:thin:@localhost:1521:XE";
+                String user = "SMS";   
+                String pass = "ayush";
 
-                System.out.println("Connected to Oracle!");
+                Connection con = DriverManager.getConnection(url, user, pass);
+
+                System.out.println("Connected SUCCESS!");
 
                 return con;
 
             } catch (Exception e) {
-                e.printStackTrace();
+                System.out.println(" CONNECTION ERROR:");
+                e.printStackTrace(); 
                 return null;
             }
         }
@@ -54,6 +58,10 @@ public class studentGUI {
             try {
                 Connection con = connectDB();
 
+                if(con == null)
+                {
+                    return "Database connection failed";
+                }
                 String query = "SELECT * FROM students";
                 Statement st = con.createStatement();
 
@@ -128,15 +136,14 @@ public class studentGUI {
                 e.printStackTrace();
             }
         }
-        // Insert student into Oracle DB
-        static void addStudentDB(int id, String name, double marks) {
+
+        // Insert student into DB
+        static boolean addStudentDB(int id, String name, double marks) {
             try {
                 Connection con = connectDB();
 
-                if(con==null)
-                {
-                    System.out.println("Connection is null");
-                    return;
+                if (con == null) {
+                    return false; //  connection fail
                 }
 
                 String query = "INSERT INTO students VALUES (?, ?, ?)";
@@ -152,9 +159,11 @@ public class studentGUI {
 
                 con.close();
 
+                return true; //  success
+
             } catch (Exception e) {
                 e.printStackTrace();
-                //System.out.println("Insert error");
+                return false;
             }
         }
     // Save data to file
@@ -273,6 +282,7 @@ public class studentGUI {
         //viewButton.setBounds(200, 220, 100, 30);
         //frame.add(viewButton);
         buttonPanel.add(viewButton);
+        
 
         // Button to delete student
         JButton deleteButton = new JButton("Delete");
@@ -329,13 +339,19 @@ public class studentGUI {
                 }
 
                 // Add student to list
-                addStudentDB(id, name, marks);
+                //addStudentDB(id, name, marks);
 
-                saveToFile();  //to save student at file
+                //saveToFile();  //to save student at file
+                boolean success = addStudentDB(id, name, marks);
 
                 // Show success message
+                if(success){
                 JOptionPane.showMessageDialog(frame, "Student Added!");
-
+                }
+                else{
+                JOptionPane.showMessageDialog(frame, "Database Error");
+ 
+                }
                 // Clear fields
                 idField.setText("");
                 nameField.setText("");
@@ -346,13 +362,14 @@ public class studentGUI {
         // View button action
         viewButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
+                System.out.println("View button clicked");
 
-                StringBuilder data = new StringBuilder();
+                // StringBuilder data = new StringBuilder();
 
                 // Collect student data
-                for (Student s : students) {
-                    data.append(s.toString()).append("\n");
-                }
+                // for (Student s : students) {
+                //     data.append(s.toString()).append("\n");
+                // }
 
                 // Show data in popup
                 displayArea.setText(getAllStudents());
@@ -363,6 +380,8 @@ public class studentGUI {
         deleteButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
+                System.out.println("Deleted clicked");
+
                 // Get ID from input field
                 int id = Integer.parseInt(idField.getText());
 
@@ -371,17 +390,17 @@ public class studentGUI {
                 displayArea.setText(getAllStudents());
 
                 // Remove student using removeIf
-                boolean removed = students.removeIf(s -> s.id == id);
+                //boolean removed = students.removeIf(s -> s.id == id);
 
-                if (removed) {
-                    saveToFile();
-                    JOptionPane.showMessageDialog(frame, "Student Deleted Successfully!");
-                } else {
-                JOptionPane.showMessageDialog(frame, "Student not found!");
-                }
+                //if (removed) {
+                    //saveToFile();
+                    //JOptionPane.showMessageDialog(frame, "Student Deleted Successfully!");
+                //} else {
+                //JOptionPane.showMessageDialog(frame, "Student not found!");
+                //}
 
                 // Clear field
-                idField.setText("");
+                //idField.setText("");
             }
         });
 
